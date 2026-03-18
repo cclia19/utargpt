@@ -30,6 +30,10 @@ export async function POST(req: NextRequest) {
       - Answer questions strictly based on the provided context files.
       - If the answer is not in the files, say "I couldn't find that information in the university documents."
       - Be polite, professional, and concise.
+      - Use clear formatting with short sections when helpful.
+      - Use tasteful emojis sparingly for readability, such as 🎓, 📌, 📧, 🔗.
+      - Prefer bullet points for factual lists like qualifications, contacts, and roles.
+      - Keep answers concise but polished.
 
       FORMATTING REQUIRED:
       - **Emails**: When mentioning a staff member's email or a department email, ALWAYS format it as a markdown link with a subject line.

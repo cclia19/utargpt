@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type ChatMessage = {
   role: "user" | "assistant";
   text: string;
+  citations?: string[];
 };
 
 export default function HomePage() {
@@ -55,7 +58,8 @@ export default function HomePage() {
       const botMessage: ChatMessage = {
         role: "assistant",
         text: data.text || "No response received.",
-      };
+        citations: data.citations || [],
+        };
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
@@ -82,16 +86,56 @@ export default function HomePage() {
         <div className="flex-1 border rounded-2xl p-4 bg-gray-50 overflow-y-auto min-h-[500px] space-y-4">
           {messages.map((msg, index) => (
             <div
-              key={index}
-              className={`max-w-[80%] px-4 py-3 rounded-2xl whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "ml-auto bg-black text-white"
-                  : "mr-auto bg-white border text-black"
-              }`}
-            >
-              {msg.text}
-            </div>
-          ))}
+  key={index}
+  className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+    msg.role === "user"
+      ? "ml-auto bg-black text-white"
+      : "mr-auto bg-white border text-black"
+  }`}
+>
+  {msg.role === "user" ? (
+    <div className="whitespace-pre-wrap">{msg.text}</div>
+  ) : (
+    <div className="space-y-3">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a: ({ ...props }) => (
+            <a
+              {...props}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            />
+          ),
+          ul: ({ ...props }) => (
+            <ul {...props} className="list-disc pl-5 space-y-1" />
+          ),
+          ol: ({ ...props }) => (
+            <ol {...props} className="list-decimal pl-5 space-y-1" />
+          ),
+          p: ({ ...props }) => <p {...props} className="mb-2 last:mb-0" />,
+          strong: ({ ...props }) => (
+            <strong {...props} className="font-semibold" />
+          ),
+        }}
+      >
+        {msg.text}
+      </ReactMarkdown>
+
+      {msg.citations && msg.citations.length > 0 && (
+        <div className="pt-2 border-t text-sm text-gray-600">
+          <div className="font-medium mb-1">Sources</div>
+          <ul className="list-disc pl-5 space-y-1">
+            {msg.citations.map((citation, i) => (
+              <li key={i}>{citation}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )}
+</div>
 
           {loading && (
             <div className="mr-auto bg-white border text-black max-w-[80%] px-4 py-3 rounded-2xl">
