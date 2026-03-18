@@ -16,6 +16,7 @@ export default function HomePage() {
     {
       role: "assistant",
       text: "Hello, I’m UTARGPT. Ask me anything about UTAR.",
+      citations: [],
     },
   ]);
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ export default function HomePage() {
 
     const userMessage: ChatMessage = {
       role: "user",
-      text: input,
+      text: input.trim(),
     };
 
     const updatedMessages = [...messages, userMessage];
@@ -35,7 +36,6 @@ export default function HomePage() {
 
     try {
       const history = updatedMessages
-        .filter((msg) => msg.role === "user" || msg.role === "assistant")
         .slice(0, -1)
         .map((msg) => ({
           role: msg.role === "assistant" ? "model" : "user",
@@ -59,7 +59,7 @@ export default function HomePage() {
         role: "assistant",
         text: data.text || "No response received.",
         citations: data.citations || [],
-        };
+      };
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
@@ -68,6 +68,7 @@ export default function HomePage() {
         {
           role: "assistant",
           text: "Sorry, something went wrong while contacting the server.",
+          citations: [],
         },
       ]);
     } finally {
@@ -76,69 +77,64 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-white text-black flex flex-col">
-      <div className="max-w-4xl w-full mx-auto flex flex-col flex-1 px-4 py-8">
-        <h1 className="text-3xl font-bold mb-2">UTARGPT</h1>
-        <p className="text-gray-600 mb-6">
-          Your AI assistant for UTAR information
-        </p>
+    <main className="min-h-screen bg-white text-black">
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">UTARGPT</h1>
+          <p className="mt-2 text-gray-600">
+            Your AI assistant for UTAR information
+          </p>
+        </div>
 
-        <div className="flex-1 border rounded-2xl p-4 bg-gray-50 overflow-y-auto min-h-[500px] space-y-4">
+        <div className="flex-1 space-y-4 rounded-2xl border bg-gray-50 p-4 min-h-[520px]">
           {messages.map((msg, index) => (
             <div
-  key={index}
-  className={`max-w-[80%] px-4 py-3 rounded-2xl ${
-    msg.role === "user"
-      ? "ml-auto bg-black text-white"
-      : "mr-auto bg-white border text-black"
-  }`}
->
-  {msg.role === "user" ? (
-    <div className="whitespace-pre-wrap">{msg.text}</div>
-  ) : (
-    <div className="space-y-3">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          a: ({ ...props }) => (
-            <a
-              {...props}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 underline"
-            />
-          ),
-          ul: ({ ...props }) => (
-            <ul {...props} className="list-disc pl-5 space-y-1" />
-          ),
-          ol: ({ ...props }) => (
-            <ol {...props} className="list-decimal pl-5 space-y-1" />
-          ),
-          p: ({ ...props }) => <p {...props} className="mb-2 last:mb-0" />,
-          strong: ({ ...props }) => (
-            <strong {...props} className="font-semibold" />
-          ),
-        }}
-      >
-        {msg.text}
-      </ReactMarkdown>
+              key={index}
+              className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                msg.role === "user"
+                  ? "ml-auto bg-black text-white"
+                  : "mr-auto border bg-white text-black"
+              }`}
+            >
+              {msg.role === "user" ? (
+                <div className="whitespace-pre-wrap">{msg.text}</div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: ({ ...props }) => (
+                          <a
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          />
+                        ),
+                      }}
+                    >
+                      {msg.text}
+                    </ReactMarkdown>
+                  </div>
 
-      {msg.citations && msg.citations.length > 0 && (
-        <div className="pt-2 border-t text-sm text-gray-600">
-          <div className="font-medium mb-1">Sources</div>
-          <ul className="list-disc pl-5 space-y-1">
-            {msg.citations.map((citation, i) => (
-              <li key={i}>{citation}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  )}
-</div>
+                  {msg.citations && msg.citations.length > 0 && (
+                    <div className="border-t pt-3 text-sm text-gray-600">
+                      <div className="mb-1 font-medium">Sources</div>
+                      <ul className="list-disc space-y-1 pl-5">
+                        {msg.citations.map((citation, i) => (
+                          <li key={i}>{citation}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
 
           {loading && (
-            <div className="mr-auto bg-white border text-black max-w-[80%] px-4 py-3 rounded-2xl">
+            <div className="mr-auto max-w-[85%] rounded-2xl border bg-white px-4 py-3 text-black">
               Thinking...
             </div>
           )}
@@ -150,15 +146,17 @@ export default function HomePage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") sendMessage();
+              if (e.key === "Enter") {
+                sendMessage();
+              }
             }}
             placeholder="Ask UTARGPT something..."
-            className="flex-1 border rounded-xl px-4 py-3 outline-none"
+            className="flex-1 rounded-xl border px-4 py-3 outline-none"
           />
           <button
             onClick={sendMessage}
             disabled={loading}
-            className="bg-black text-white px-5 py-3 rounded-xl disabled:opacity-50"
+            className="rounded-xl bg-black px-5 py-3 text-white disabled:opacity-50"
           >
             Send
           </button>
