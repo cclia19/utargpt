@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
       BEHAVIOR:
       - Answer questions strictly based on the provided context files.
-      - If the answer is not in the files, say "I couldn't find that information in the university documents."
+      - If the answer is not in the files, say "Currently I do not have this info, but I am always learning"
       - Be polite, professional, and concise.
       - Use clear formatting with short sections when helpful.
       - Use tasteful emojis sparingly for readability, such as 🎓, 📌, 📧, 🔗.

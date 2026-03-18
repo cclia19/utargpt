@@ -90,7 +90,7 @@ export default function HomePage() {
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+              className={`w-fit max-w-[85%] rounded-2xl px-4 py-3 break-words ${
                 msg.role === "user"
                   ? "ml-auto bg-black text-white"
                   : "mr-auto border bg-white text-black"
